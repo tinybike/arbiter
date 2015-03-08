@@ -5,9 +5,9 @@ DEBUG = True
 TESTING = False
 
 POSTGRES_HOST = 'localhost'
-POSTGRES_DATABASE = 'peerrev'
-POSTGRES_USER = 'peerrev'
-POSTGRES_PASSWORD = 'peerrev'
+POSTGRES_DATABASE = 'arbiter'
+POSTGRES_USER = 'arbiter'
+POSTGRES_PASSWORD = 'starbiter'
 
 UPLOAD_FOLDER = './uploads'
 MAX_CONTENT_LENGTH =  10000000

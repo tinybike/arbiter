@@ -8,9 +8,9 @@ if platform.node() in ('loopy', 'nerve'):
     DEPLOY_ENV = 'prod'
     DEBUG = False
     POSTGRES_HOST = 'localhost'
-    POSTGRES_DATABASE = 'peerrev'
-    POSTGRES_USER = 'peerrev'
-    POSTGRES_PASSWORD = 'peerrev'
+    POSTGRES_DATABASE = 'arbiter'
+    POSTGRES_USER = 'arbiter'
+    POSTGRES_PASSWORD = 'starbiter'
 else:
     SECRET_KEY = os.environ.get('SECRET_KEY')
     DEPLOY_ENV = os.environ.get('DEPLOY_ENV', 'local')
