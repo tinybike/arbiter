@@ -149,5 +149,10 @@
         window.socket = io.connect(socket_url);
         arbiter = new Arbiter();
         arbiter.intake().exhaust();
+        if (window.page) {
+            $('#review-display').hide();
+        } else {
+            $('#review-display').show();
+        }
     });
 })(jQuery);
