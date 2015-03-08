@@ -227,13 +227,11 @@ def insert_user(username, password, email):
         'password': guard.bcrypt_digest(password.encode('utf-8')),
         'email': email,
     }
-    insert_user_query = (
-        "INSERT INTO users "
-        "(username, password, email, joined) "
-        "VALUES "
-        "(%(username)s, %(password)s, %(email)s, now()) "
-        "RETURNING user_id"
-    )
+    insert_user_query = """INSERT INTO users 
+                           (username, password, email, joined) 
+                           VALUES 
+                           (%(username)s, %(password)s, %(email)s, now()) 
+                           RETURNING user_id"""
     insert_result = None
     with cursor() as cur:
         cur.execute(insert_user_query, insert_user_parameters)
@@ -284,11 +282,9 @@ def login():
         else:
             return render_template('login.html')
     user = None
-    with cursor(True) as cur:
-        query = (
-            "SELECT user_id, password, email, admin FROM users "
-            "WHERE username = %s"
-        )
+    with cursor(1) as cur:
+        query = """SELECT user_id, password, email, admin FROM users 
+                   WHERE username = %s"""
         cur.execute(query, (request.form['username'],))
         for row in cur:
             stored_password_digest = row['password']
@@ -324,7 +320,7 @@ def logout():
 def load_user(user_id):
     user = None
     query = "SELECT user_id, username, email FROM users WHERE user_id = %s"
-    with cursor(True) as cur:
+    with cursor(1) as cur:
         cur.execute(query, (str(user_id),))
         if cur.rowcount:
             res = cur.fetchone()
@@ -337,34 +333,23 @@ def load_user(user_id):
 
 @socketio.on('get-votes', namespace='/socket.io/')
 def get_votes():
-    question_ids, questions = [], []
-    votes = {
-        'question_id': [],
-        'question': [],
-        'votecount': [],
-        'answer': [],
-    }
+    votes = []
     with cursor(1) as cur:
-        query = (
-            "SELECT question_id, question FROM questions "
-            "WHERE acceptvotes = 't'"
-        )
+        query = """SELECT question_id, question, choices 
+                   FROM questions 
+                   ORDER BY question_id"""
         cur.execute(query)
         for row in cur:
-            question_ids.append(row['question_id'])
-            questions.append(row['question'])
-        if question_ids:
-            for i, question_id in enumerate(question_ids):
-                query = (
-                    "SELECT answer, question_id, votecount FROM answers "
-                    "WHERE question_id = %s"
-                )
-                cur.execute(query, (question_id,))
-                for row in cur:
-                    votes['question_id'].append(question_id)
-                    votes['question'].append(questions[i])
-                    votes['answer'].append(row['answer'])
-                    votes['votecount'].append(row['votecount'])
+            votes.append(row)
+        for i, vote in enumerate(votes):
+            votes[i]["answers"] = []
+            query = """SELECT answer, votecount 
+                       FROM answers 
+                       WHERE question_id = %s
+                       ORDER BY answer_id"""
+            cur.execute(query, (vote['question_id'],))
+            for row in cur:
+                votes[i]["answers"].append(row)
     emit('votes', votes)
 
 @socketio.on('submit-vote', namespace='/socket.io/')
@@ -372,13 +357,11 @@ def submit_vote(req):
     vote_id = None
     if 'user_id' in session:
         with cursor() as cur:
-            query = (
-                "INSERT INTO votes "
-                "(answer_id, user_id, username) "
-                "VALUES "
-                "(%(answer_id)s, %(user_id)s, %(username)s) "
-                "RETURNING vote_id"
-            )
+            query = """INSERT INTO votes 
+                       (answer_id, user_id, username) 
+                       VALUES 
+                       (%(answer_id)s, %(user_id)s, %(username)s) 
+                       RETURNING vote_id"""
             params = {
                 'answer_id': req['answer_id'],
                 'user_id': session['user_id'],
@@ -389,43 +372,36 @@ def submit_vote(req):
             vote_id = row[0]
         emit('vote-submitted', {'vote_id': vote_id})
 
-@app.route('/question', methods=['GET', 'POST'])
-def question():
-    if request.method == 'GET':
-        return render_template('question.html')
-    question_id = None
-    with cursor() as cur:
-        params = {
-            'user_id': session['user_id'],
-            'username': session['user'],
-            'question': request.form['question-text'],
-            'acceptvotes': True,
-        }
-        query = (
-            "INSERT INTO questions "
-            "(user_id, username, question) "
-            "VALUES "
-            "(%(user_id)s, %(username)s, %(question)s) "
-            "RETURNING question_id"
-        )
-        cur.execute(query, params)
-        for row in cur:
-            question_id = row[0]
-        if question_id is not None:
-            for answer in answers:
-                params = {
-                    'question_id': question_id,
-                    'answer': answer['answer_text'],
-                }
-                query = (
-                    "INSERT INTO answers "
-                    "(answer, question_id) "
-                    "VALUES "
-                    "(%(answer)s, %(question_id)s)"
-                )
-                cur.execute(query, params)
-            return render_template('submitted.html')
-    return render_template('question.html')
+@socketio.on('submit-question', namespace='/socket.io/')
+def submit_question(req):
+    question = { 'question_id': None }
+    if 'user_id' in session:
+        with cursor() as cur:
+            params = {
+                'user_id': session['user_id'],
+                'username': session['user'],
+                'question': req['question_text'],
+            }
+            query = """INSERT INTO questions 
+                       (user_id, username, question) 
+                       VALUES 
+                       (%(user_id)s, %(username)s, %(question)s) 
+                       RETURNING question_id"""
+            cur.execute(query, params)
+            for row in cur:
+                question_id = row[0]
+            if question_id is not None:
+                for answer in answers:
+                    params = {
+                        'question_id': question_id,
+                        'answer': answer['answer_text'],
+                    }
+                    query = """INSERT INTO answers 
+                               (answer, question_id) 
+                               VALUES 
+                               (%(answer)s, %(question_id)s)"""
+                    cur.execute(query, params)
+        emit('question-submitted', question)
 
 @app.route('/submitted', methods=['GET'])
 def submitted():

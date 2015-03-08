@@ -34,11 +34,7 @@
           {% if g.user.is_authenticated() %}
             <li class="divider"></li>
             <li>
-              <a href="#" id="peer-review">peer review</a>
-            </li>
-            <li class="divider"></li>
-            <li>
-              <a href="{{ url_for('report') }}">progress report</a>
+              <a href="#" id="new-question">new question</a>
             </li>
             <li class="divider"></li>
             <li>
@@ -100,6 +96,12 @@
         </div>
       </div>
     </footer>
+    <div id="modal-dynamic" class="reveal-modal small" data-reveal>
+      <h3 id="modal-header"></h3>
+      <div id="modal-body"></div>
+      <a class="close-reveal-modal">&#215;</a>
+      <div id="modal-ok-box"><button id="modal-ok-button" class="button small">Ok</button></div>
+    </div>
     <script src="{{ url_for('static', filename='js/vendor/jquery.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/jquery-migrate.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/placeholders.min.js') }}"></script>

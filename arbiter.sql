@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS questions CASCADE;
 CREATE TABLE questions (
     question_id bigserial PRIMARY KEY,
     question text,
+    choices int,
     acceptvotes boolean DEFAULT true,
     user_id bigint,
     username varchar(20),

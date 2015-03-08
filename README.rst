@@ -1,4 +1,4 @@
-peer review
------------
+arbiter
+-------
 
-Minimal peer review app.
+Minimal voting web app
