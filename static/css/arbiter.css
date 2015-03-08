@@ -34,3 +34,12 @@ html, body {
 #modal-ok-button {
     margin-bottom: 0;
 }
+
+.tally {
+    transition: all 0.15s ease-in;
+    cursor: pointer;
+}
+
+.tally:hover {
+    background-color: #CEECF5;
+}

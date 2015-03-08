@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
-peer review app
+The Forecast Foundation's super sweet, super minimal voting web app.
+
+(c) Jack Peterson (jack@tinybike.net), 3/8/2015
 
 """
 from __future__ import division
@@ -343,7 +345,7 @@ def get_votes():
             votes.append(row)
         for i, vote in enumerate(votes):
             votes[i]["answers"] = []
-            query = """SELECT answer, votecount 
+            query = """SELECT answer_id, answer, votecount 
                        FROM answers 
                        WHERE question_id = %s
                        ORDER BY answer_id"""
@@ -357,19 +359,35 @@ def submit_vote(req):
     vote_id = None
     if 'user_id' in session:
         with cursor() as cur:
+            query = "SELECT question_id FROM answers WHERE answer_id = %s"
+            cur.execute(query, (req['answer_id'],))
+            for row in cur:
+                question_id = row[0]
+            query = """SELECT count(*) FROM votes
+                       WHERE user_id = %s 
+                       AND question_id = %s"""
+            cur.execute(query, (session['user_id'], question_id))
+            if cur.fetchone()[0] > 0:
+                query = """DELETE FROM votes 
+                           WHERE user_id = %s 
+                           AND question_id = %s"""
+                cur.execute(query, (session['user_id'], question_id))
             query = """INSERT INTO votes 
-                       (answer_id, user_id, username) 
+                       (question_id, answer_id, 
+                       user_id, username) 
                        VALUES 
-                       (%(answer_id)s, %(user_id)s, %(username)s) 
+                       (%(question_id)s, %(answer_id)s,
+                       %(user_id)s, %(username)s) 
                        RETURNING vote_id"""
             params = {
+                'question_id': question_id,
                 'answer_id': req['answer_id'],
                 'user_id': session['user_id'],
                 'username': session['user'],
             }
-        cur.execute(query, params)
-        for row in cur:
-            vote_id = row[0]
+            cur.execute(query, params)
+            for row in cur:
+                vote_id = row[0]
         emit('vote-submitted', {'vote_id': vote_id})
 
 @socketio.on('submit-question', namespace='/socket.io/')
@@ -381,20 +399,21 @@ def submit_question(req):
                 'user_id': session['user_id'],
                 'username': session['user'],
                 'question': req['question_text'],
+                'choices': len(req['answers']),
             }
             query = """INSERT INTO questions 
-                       (user_id, username, question) 
+                       (user_id, username, question, choices) 
                        VALUES 
-                       (%(user_id)s, %(username)s, %(question)s) 
+                       (%(user_id)s, %(username)s, %(question)s, %(choices)s) 
                        RETURNING question_id"""
             cur.execute(query, params)
             for row in cur:
                 question_id = row[0]
             if question_id is not None:
-                for answer in answers:
+                for answer in req['answers']:
                     params = {
                         'question_id': question_id,
-                        'answer': answer['answer_text'],
+                        'answer': answer,
                     }
                     query = """INSERT INTO answers 
                                (answer, question_id) 
@@ -402,10 +421,6 @@ def submit_question(req):
                                (%(answer)s, %(question_id)s)"""
                     cur.execute(query, params)
         emit('question-submitted', question)
-
-@app.route('/submitted', methods=['GET'])
-def submitted():
-    return render_template('submitted.html')
 
 def main():
     if app.config['DEBUG']:

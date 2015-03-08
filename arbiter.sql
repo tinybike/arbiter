@@ -41,7 +41,7 @@ CREATE TABLE votes (
     UNIQUE (user_id, question_id)
 );
 
-CREATE OR REPLACE FUNCTION update_votecount()
+CREATE OR REPLACE FUNCTION increment_votecount()
 RETURNS TRIGGER AS $function$
 BEGIN
     UPDATE answers
@@ -55,4 +55,20 @@ DROP TRIGGER IF EXISTS vote_trigger ON votes;
 CREATE TRIGGER vote_trigger
     AFTER INSERT ON votes
     FOR EACH ROW
-    EXECUTE PROCEDURE update_votecount();
+    EXECUTE PROCEDURE increment_votecount();
+
+CREATE OR REPLACE FUNCTION decrement_votecount()
+RETURNS TRIGGER AS $function$
+BEGIN
+    UPDATE answers
+        SET votecount = votecount - 1
+        WHERE answer_id = old.answer_id;
+    RETURN old;
+END;
+$function$ LANGUAGE plpgsql VOLATILE
+SECURITY DEFINER;
+DROP TRIGGER IF EXISTS revote_trigger ON votes;
+CREATE TRIGGER revote_trigger
+    AFTER DELETE ON votes
+    FOR EACH ROW
+    EXECUTE PROCEDURE decrement_votecount();

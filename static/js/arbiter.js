@@ -47,9 +47,9 @@
                     subtable = "<td><table>";
                     if (i == 0)
                         subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
-                    for (var j = 0, len = res[i].choices; j < len; ++j) {
+                    for (var j = 0, jlen = res[i].choices; j < jlen; ++j) {
                         ans = res[i].answers[j];
-                        subtable += "<tr>" +
+                        subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
                             "<td>" + ans.answer + "</td>" +
                             "<td>" + ans.votecount + "</td>" +
                             "</tr>";
@@ -59,7 +59,40 @@
                 }
                 votetable += "</table>";
                 $('#review-display').html(votetable);
+                $('.tally').each(function () {
+                    var tally = this;
+                    $(this).click(function (event) {
+                        event.preventDefault();
+                        var prompt = '<hr /><div class="row centered">' +
+                                     '<form action="#" method="POST" id="cast-vote-form">' +
+                                     tally.firstElementChild.textContent +
+                                     '<hr />' +
+                                     '<button type="submit" class="button expand" '+
+                                     'id="submit-vote-button">Vote!</button>' +
+                                     '</form></div>';
+                        modal_prompt(prompt, "h2", "Casting vote for...");
+                        $('#cast-vote-form').submit(function (event) {
+                            event.preventDefault();
+                            var ans = $(tally).attr('class').split(' ').sort()[0];
+                            socket.emit('submit-vote', {
+                                answer_id: ans.split('-').sort()[0],
+                            });
+                            $('#modal-dynamic').foundation('reveal', 'close');
+                        });
+                    });
+                    $(this.childNodes).each(function () {
+                        $(this).addClass('cast-vote');
+                    });
+                });
             }
+        });
+
+        socket.on('vote-submitted', function (res) {
+            socket.emit('get-votes');
+        });
+
+        socket.on('question-submitted', function (res) {
+            socket.emit('get-votes');
         });
 
         return self;
@@ -74,13 +107,9 @@
             $('#modal-dynamic').foundation('reveal', 'close');
         });
 
+        // Submit a new question for voting
         $('#new-question').click(function (event) {
             event.preventDefault();
-            // var answers = '<select>' +
-            //     '<option value="true">Yes</option>' +
-            //     '<option value="false">No</option>' +
-            //     '<option value="abstain">Abstain</option>' +
-            //     '</select>';
             var answers = '<ul style="list-style-type:none;margin-left:0">' +
                 '<li><input type="text" id="answer-1" class="possible-answer" value="Yes" required /></li>' +
                 '<li><input type="text" id="answer-2" class="possible-answer" value="No" required /></li>' +
@@ -95,10 +124,16 @@
             modal_prompt(question, "h5", "Propose a question");
             $('form#new-question-form').submit(function (event) {
                 event.preventDefault();
+                var answers = [];
+                $('.possible-answer').each(function () {
+                    answers.push(this.value);
+                });
                 socket.emit('submit-question', {
                     question_text: $('#question-text').val(),
+                    answers: answers,
                 });
-                $('#question-text').val("");
+                this.reset();
+                $('#modal-dynamic').foundation('reveal', 'close');
             });
         });
 
