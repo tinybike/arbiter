@@ -335,24 +335,25 @@ def load_user(user_id):
 
 @socketio.on('get-votes', namespace='/socket.io/')
 def get_votes():
-    votes = []
-    with cursor(1) as cur:
-        query = """SELECT question_id, question, choices 
-                   FROM questions 
-                   ORDER BY question_id"""
-        cur.execute(query)
-        for row in cur:
-            votes.append(row)
-        for i, vote in enumerate(votes):
-            votes[i]["answers"] = []
-            query = """SELECT answer_id, answer, votecount 
-                       FROM answers 
-                       WHERE question_id = %s
-                       ORDER BY answer_id"""
-            cur.execute(query, (vote['question_id'],))
+    if 'user_id' in session:
+        votes = []
+        with cursor(1) as cur:
+            query = """SELECT question_id, question, choices 
+                       FROM questions 
+                       ORDER BY question_id"""
+            cur.execute(query)
             for row in cur:
-                votes[i]["answers"].append(row)
-    emit('votes', votes)
+                votes.append(row)
+            for i, vote in enumerate(votes):
+                votes[i]["answers"] = []
+                query = """SELECT answer_id, answer, votecount 
+                           FROM answers 
+                           WHERE question_id = %s
+                           ORDER BY answer_id"""
+                cur.execute(query, (vote['question_id'],))
+                for row in cur:
+                    votes[i]["answers"].append(row)
+        emit('votes', votes)
 
 @socketio.on('submit-vote', namespace='/socket.io/')
 def submit_vote(req):
