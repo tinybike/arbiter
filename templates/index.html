@@ -1,0 +1,119 @@
+<!doctype html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>arbiter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/arbiter.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/google-fonts.css') }}" />
+    <script src="{{ url_for('static', filename='js/vendor/modernizr.js') }}"></script>
+    <script>window.username = "{{ session.user }}";</script>
+    {% block page %}{% endblock %}
+  </head>
+  <body>
+    <nav class="top-bar" data-topbar>
+      <ul class="title-area">
+        <li class="name">
+          <h1><a href="/">arbiter</a></h1>
+        </li>
+        <li class="toggle-topbar menu-icon">
+          <a href="#"><span>Menu</span></a>
+        </li>
+      </ul>
+      <section class="top-bar-section">
+        <ul class="left">
+          <li class="divider"></li>
+        </ul>
+        <ul class="right">
+          <li class="divider"></li>
+        </ul>
+        <ul class="right">
+          <li class="divider"></li>
+          {% if g.user.is_authenticated() %}
+            <li class="divider"></li>
+            <li>
+              <a href="#" id="peer-review">peer review</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="{{ url_for('report') }}">progress report</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="{{ url_for('logout') }}">logout</a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="#" id="userblock">{{ session.user }}</a>
+            </li>
+          {% else %}
+            <li><a href="{{ url_for('register') }}">register</a></li>
+            <li class="divider"></li>
+            <li><a href="{{ url_for('login') }}">login</a></li>
+          {% endif %}
+        </ul>
+      </section>
+    </nav>
+    <div class="vertical-spacer-25"></div>
+    <div class="row">
+      <div class="large-12 columns">
+        <div class="panel" id="main-panel">
+          {% block body %}{% endblock %}
+          <div class="row"><div id="review-display"></div></div>
+            <div class="row">
+              <div class="large-12 columns">
+                <div id="review-entry" style="display:none">
+                  <form action="" method="POST" id="review-form">
+                    <div class="row">
+                      <input type="hidden" id="report-id" name="report-id" value="" />
+                      <input type="hidden" id="reviewee" name="reviewee" value="" />
+                      <input type="number" max="10" min="0" id="rating" name="rating" class="input-xlarge" placeholder="Rate this report (lowest: 0, highest: 10)" required autofocus />
+                    </div>
+                    <div class="row">
+                      <textarea id="comment-text" name="comments" rows="10" cols="10" placeholder="Enter your comments here" ></textarea>
+                    </div>
+                    <div class="row">
+                      <button type="submit" class="button small right-space">Submit Review</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="row">
+      <div class="large-12 columns">
+        <hr/>
+        <div class="row">
+          <div class="large-6 columns">
+            <p>&copy; Copyright 2015, <a href="http://www.augur.net">Forecast Foundation</a></p>
+          </div>
+          <div class="large-6 columns">
+            <ul class="inline-list right">
+              <li><a href="mailto:jack@augur.net">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script src="{{ url_for('static', filename='js/vendor/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vendor/jquery-migrate.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vendor/placeholders.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/foundation/foundation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/foundation/foundation.dropdown.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/foundation/foundation.topbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/foundation/foundation.tab.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/foundation/foundation.reveal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vendor/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/arbiter.js') }}"></script>
+    <script>
+      $(document).foundation();
+      var doc = document.documentElement;
+      doc.setAttribute('data-useragent', navigator.userAgent);
+    </script>
+  </body>
+</html>

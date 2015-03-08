@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block page %}<script>window.page = "register";</script>{% endblock %}
+{% block body %}
+  <div class="vertical-spacer-30"></div>
+  <div class="row">
+    <div class="large-12 columns">
+      <div class="light-gray-box">
+        <form action="" method="POST" id="registration-form">
+          <input type="text" id="username" name="username" placeholder="Username" value="{{ request.form.username }}" required autofocus />
+          <input type="password" id="password" name="password" placeholder="Password" value="{{ request.form.password }}" required />
+          <input type="email" id="email" name="email" placeholder="Email" value="{{ request.form.username }}" required />
+          <button type="submit" class="button small" id="register">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
