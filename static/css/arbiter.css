@@ -1,6 +1,24 @@
 html, body {
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+.title {
+    font-family: "Poiret One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+}
+#splash {
+    font-family: "Poiret One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 55pt;
+    text-align: center;
+}
+#main-panel {
+    background-color: #FFF;
+}
+#subsplash {
+    clear: both;
+    font-family: "Titan One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 20pt;
+    text-align: center;
+}
 .vertical-spacer-25 {
     clear: both;
     width: 100%;

@@ -149,10 +149,15 @@
         window.socket = io.connect(socket_url);
         arbiter = new Arbiter();
         arbiter.intake().exhaust();
-        if (window.page) {
+        if (window.login || window.page)
+            $('#splash').hide();
+        else
+            $('#splash').show();
+        if (window.page)
             $('#review-display').hide();
-        } else {
+        else
             $('#review-display').show();
-        }
+        if (window.login)
+            $('#main-panel').css('background-color', '#f2f2f2');
     });
 })(jQuery);

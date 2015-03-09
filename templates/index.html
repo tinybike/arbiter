@@ -9,14 +9,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/arbiter.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/google-fonts.css') }}" />
     <script src="{{ url_for('static', filename='js/vendor/modernizr.js') }}"></script>
-    <script>window.username = "{{ session.user }}";</script>
+    <script>
+      window.username = "{{ session.user }}";
+      window.login = (username != "");
+    </script>
     {% block page %}{% endblock %}
   </head>
   <body>
     <nav class="top-bar" data-topbar>
       <ul class="title-area">
         <li class="name">
-          <h1><a href="/">arbiter</a></h1>
+          <h1><a href="/"><span class="title">arbiter</span></a></h1>
         </li>
         <li class="toggle-topbar menu-icon">
           <a href="#"><span>Menu</span></a>
@@ -57,27 +60,13 @@
       <div class="large-12 columns">
         <div class="panel" id="main-panel">
           {% block body %}{% endblock %}
-          <div class="row"><div id="review-display"></div></div>
-            <div class="row">
-              <div class="large-12 columns">
-                <div id="review-entry" style="display:none">
-                  <form action="" method="POST" id="review-form">
-                    <div class="row">
-                      <input type="hidden" id="report-id" name="report-id" value="" />
-                      <input type="hidden" id="reviewee" name="reviewee" value="" />
-                      <input type="number" max="10" min="0" id="rating" name="rating" class="input-xlarge" placeholder="Rate this report (lowest: 0, highest: 10)" required autofocus />
-                    </div>
-                    <div class="row">
-                      <textarea id="comment-text" name="comments" rows="10" cols="10" placeholder="Enter your comments here" ></textarea>
-                    </div>
-                    <div class="row">
-                      <button type="submit" class="button small right-space">Submit Review</button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
+          <div class="row">
+            <div id="review-display"></div>
+            <div id="splash">arbiter</div>
           </div>
+          <!-- <div class="row">
+            <div id="subsplash">voting system</div>
+          </div> -->
         </div>
       </div>
     </div>
