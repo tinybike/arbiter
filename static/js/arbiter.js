@@ -3,6 +3,7 @@
  */
 var ARBITER = (function (my, $) {
 
+    var votes_to_win = 4;
     var sync_interval = 15000;  // 15 second update interval
 
     // Module exports
@@ -78,10 +79,18 @@ var ARBITER = (function (my, $) {
                         subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
                     for (var j = 0, jlen = res[i].choices; j < jlen; ++j) {
                         ans = res[i].answers[j];
-                        subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
-                            "<td>" + ans.answer + "</td>" +
-                            "<td>" + ans.votecount + "</td>" +
-                            "</tr>";
+                        if (parseInt(ans.votecount) > votes_to_win) {
+                            subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
+                                "<td>" + ans.answer + "</td>" +
+                                "<td>" + ans.votecount +
+                                "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
+                                "</tr>";
+                        } else {
+                            subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
+                                "<td>" + ans.answer + "</td>" +
+                                "<td>" + ans.votecount + "</td>" +
+                                "</tr>";
+                        }
                     }
                     subtable += "</table></td>";
                     votetable += subtable + "</tr>";
