@@ -1,0 +1,14 @@
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>arbiter</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/arbiter.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/google-fonts.css') }}" />
+  <script src="{{ url_for('static', filename='js/vendor/modernizr.js') }}"></script>
+  <script>
+    window.username = "{{ session.user }}";
+    window.login = (username != "");
+  </script>
+  {% block page %}{% endblock %}
+</head>

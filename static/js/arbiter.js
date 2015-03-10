@@ -1,4 +1,23 @@
-(function ($) {
+/**
+ * arbiter front-end core
+ */
+var ARBITER = (function (my, $) {
+
+    var sync_interval = 15000;  // 15 second update interval
+
+    // Module exports
+    var _exports = my._exports = my._exports || {};
+    _exports.votes = {};
+    var _seal = my._seal = my._seal || function () {
+        delete my._exports;
+        delete my._seal;
+        delete my._unseal;
+    };    
+    var _unseal = my._unseal = my._unseal || function () {
+        my._exports = _exports;
+        my._seal = _seal;
+        my._unseal = _unseal;
+    };
 
     // Create modal alert windows (using Foundation reveal)
     function modal_alert(bodytext, bodytag, headertext) {
@@ -31,13 +50,23 @@
         $('#modal-dynamic').foundation('reveal', 'open');
     }
 
-    function Arbiter() { }
+    function Arbiter(socket) {
+        this.socket = socket;
+    }
+
+    // Get all active votes
+    Arbiter.prototype.sync = function () {
+        (function sync_votes() {
+            this.socket.emit('get-votes');
+            setTimeout(sync_votes, sync_interval);
+        })();
+    };
     
     Arbiter.prototype.intake = function () {
         var self = this;
 
         // Display all votes
-        socket.on('votes', function (res) {
+        this.socket.on('votes', function (res) {
             var votetable, subtable, ans;
             if (res && res.length) {
                 votetable = "<table>";
@@ -74,7 +103,7 @@
                         $('#cast-vote-form').submit(function (event) {
                             event.preventDefault();
                             var ans = $(tally).attr('class').split(' ').sort()[0];
-                            socket.emit('submit-vote', {
+                            self.socket.emit('submit-vote', {
                                 answer_id: ans.split('-').sort()[0],
                             });
                             $('#modal-dynamic').foundation('reveal', 'close');
@@ -84,16 +113,12 @@
                         $(this).addClass('cast-vote');
                     });
                 });
+                _exports.votes = res;
             }
         });
 
-        socket.on('vote-submitted', function (res) {
-            socket.emit('get-votes');
-        });
-
-        socket.on('question-submitted', function (res) {
-            socket.emit('get-votes');
-        });
+        this.socket.on('vote-submitted', function (res) { self.sync(); });
+        this.socket.on('question-submitted', function (res) { self.sync(); });
 
         return self;
     };
@@ -110,11 +135,13 @@
         // Submit a new question for voting
         $('#new-question').click(function (event) {
             event.preventDefault();
-            var answers = '<ul style="list-style-type:none;margin-left:0">' +
+            var answers = '<ul class="plain flush-left" id="answer-list">' +
                 '<li><input type="text" id="answer-1" class="possible-answer" value="Yes" required /></li>' +
                 '<li><input type="text" id="answer-2" class="possible-answer" value="No" required /></li>' +
-                '<li><input type="text" id="answer-3" class="possible-answer" value="Maybe" /></li>' +
-                '</ul>';
+                '<li><input type="text" id="answer-3" class="possible-answer" value="Maybe" required /></li>' +
+                '</ul>' +
+                '<button class="button secondary tiny" id="less-options">-</button>&nbsp;' +
+                '<button class="button secondary tiny" id="more-options">+</button>';
             var question = '<form action="#" method="POST" id="new-question-form">' +
                 '<input type="text" id="question-text" name="question-text" class="input-xlarge"' +
                 'placeholder="Enter your question here" required autofocus />' +
@@ -122,13 +149,31 @@
                 '<button type="submit" class="button small" id="submit-question-button">Submit</button>' +
                 '</form>';
             modal_prompt(question, "h5", "Propose a question");
+            $('#less-options').click(function (event) {
+                var num_answers = $('#answer-list').children().length;
+                if (num_answers > 1)
+                    $('#answer-' + JSON.stringify(num_answers)).parent().remove();
+                event.preventDefault();
+            });
+            $('#more-options').click(function (event) {
+                var num_answers = parseInt($('#answer-list').children().length);
+                $('<li />').append(
+                    $('<input required />')
+                        .addClass("possible-answer")
+                        .val("")
+                        .attr("type", "text")
+                        .attr("id", "answer-" + JSON.stringify(num_answers + 1))
+                        .attr("placeholder", "Enter answer here...")
+                ).appendTo($('#answer-list'));
+                event.preventDefault();
+            });
             $('form#new-question-form').submit(function (event) {
                 event.preventDefault();
                 var answers = [];
                 $('.possible-answer').each(function () {
                     answers.push(this.value);
                 });
-                socket.emit('submit-question', {
+                self.socket.emit('submit-question', {
                     question_text: $('#question-text').val(),
                     answers: answers,
                 });
@@ -137,27 +182,25 @@
             });
         });
 
-        // Get all active votes
-        socket.emit('get-votes');
-
         return self;
     };
 
     $(document).ready(function () {
         var socket_url, arbiter;
-        socket_url = window.location.protocol + '//' + document.domain + ':' + location.port + '/socket.io/';
-        window.socket = io.connect(socket_url);
-        arbiter = new Arbiter();
-        arbiter.intake().exhaust();
-        if (window.login || window.page)
-            $('#splash').hide();
-        else
-            $('#splash').show();
-        if (window.page)
-            $('#review-display').hide();
-        else
-            $('#review-display').show();
-        if (window.login)
-            $('#main-panel').css('background-color', '#f2f2f2');
+        socket_url = window.location.protocol + '//' + document.domain +
+            ':' + location.port + '/socket.io/';
+        socket = io.connect(socket_url);
+        socket.on('connect', function () {
+            arbiter = new Arbiter(socket);
+            arbiter.intake().exhaust();
+            if (login) {
+                $('#splash').hide();
+                $('#review-display').show();
+                arbiter.sync();
+            }                
+        })
     });
-})(jQuery);
+
+    return _exports;
+
+}(ARBITER || {}, jQuery));

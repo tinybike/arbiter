@@ -1,0 +1,39 @@
+<nav class="top-bar" data-topbar>
+  <ul class="title-area">
+    <li class="name">
+      <h1><a href="/"><span class="title">arbiter</span></a></h1>
+    </li>
+    <li class="toggle-topbar menu-icon">
+      <a href="#"><span>Menu</span></a>
+    </li>
+  </ul>
+  <section class="top-bar-section">
+    <ul class="left">
+      <li class="divider"></li>
+    </ul>
+    <ul class="right">
+      <li class="divider"></li>
+    </ul>
+    <ul class="right">
+      <li class="divider"></li>
+      {% if g.user.is_authenticated() %}
+        <li class="divider"></li>
+        <li>
+          <a href="#" id="new-question">new question</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a href="{{ url_for('logout') }}">logout</a>
+        </li>
+        <li class="divider"></li>
+        <li>
+          <a href="#" id="userblock">{{ session.user }}</a>
+        </li>
+      {% else %}
+        <li><a href="{{ url_for('register') }}">register</a></li>
+        <li class="divider"></li>
+        <li><a href="{{ url_for('login') }}">login</a></li>
+      {% endif %}
+    </ul>
+  </section>
+</nav>

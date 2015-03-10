@@ -1,0 +1,45 @@
+<!doctype html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html lang="en" data-useragent="Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)">
+  {% include "headers.html" %}
+  <body>
+    {% include "navbar.html" %}
+    <div class="vertical-spacer-25"></div>
+    <div class="row">
+      <div class="large-12 columns">
+        <div class="panel" id="main-panel">
+          {% block body %}{% endblock %}
+        </div>
+      </div>
+    </div>
+    <footer class="row">
+      <div class="large-12 columns">
+        <hr/>
+        <div class="row">
+          <div class="large-6 columns">
+            <p>&copy; Copyright 2015 <a href="http://www.augur.net">Forecast Foundation</a></p>
+          </div>
+          <div class="large-6 columns">
+            <ul class="inline-list right">
+              <li><a href="mailto:jack@augur.net">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <div id="modal-dynamic" class="reveal-modal small" data-reveal>
+      <h3 id="modal-header"></h3>
+      <div id="modal-body"></div>
+      <a class="close-reveal-modal">&#215;</a>
+      <div id="modal-ok-box">
+        <button id="modal-ok-button" class="button small">Ok</button>
+      </div>
+    </div>
+    {% include "scripts.html" %}
+    <script>
+      $(document).foundation();
+      var doc = document.documentElement;
+      doc.setAttribute('data-useragent', navigator.userAgent);
+    </script>
+  </body>
+</html>

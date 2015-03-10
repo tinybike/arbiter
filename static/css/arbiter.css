@@ -13,12 +13,6 @@ html, body {
 #main-panel {
     background-color: #FFF;
 }
-#subsplash {
-    clear: both;
-    font-family: "Titan One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 20pt;
-    text-align: center;
-}
 .vertical-spacer-25 {
     clear: both;
     width: 100%;
@@ -37,13 +31,8 @@ html, body {
 .plain {
     list-style-type: none;
 }
-.report-body {
-    border: 1px solid #ccc;
-    margin: 10px 0;
-    padding: 10px 15px;
-}
-.review-entry {
-    display: none;
+.flush-left {
+    margin-left: 0;
 }
 
 #modal-ok-box {
@@ -57,7 +46,10 @@ html, body {
     transition: all 0.15s ease-in;
     cursor: pointer;
 }
-
 .tally:hover {
     background-color: #CEECF5;
+}
+
+#review-display {
+    display: none;
 }
