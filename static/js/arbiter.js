@@ -79,7 +79,7 @@ var ARBITER = (function (my, $) {
                         subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
                     for (var j = 0, jlen = res[i].choices; j < jlen; ++j) {
                         ans = res[i].answers[j];
-                        if (parseInt(ans.votecount) > votes_to_win) {
+                        if (parseInt(ans.votecount) >= votes_to_win) {
                             subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
                                 "<td>" + ans.answer + "</td>" +
                                 "<td>" + ans.votecount +
