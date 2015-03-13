@@ -58,7 +58,7 @@ var ARBITER = (function (my, $) {
     // Get all active votes
     Arbiter.prototype.sync = function () {
         (function sync_votes() {
-            this.socket.emit('get-votes');
+            this.socket.emit('get-votes', { votes_to_win: votes_to_win });
             setTimeout(sync_votes, sync_interval);
         })();
     };
@@ -68,35 +68,76 @@ var ARBITER = (function (my, $) {
 
         // Display all votes
         this.socket.on('votes', function (res) {
-            var votetable, subtable, ans;
-            if (res && res.length) {
-                votetable = "<table>";
-                for (var i = 0, len = res.length; i < len; ++i) {
-                    votetable += "<tr>" +
-                        "<td>" + res[i].question_id + ". " + res[i].question + "</td>";
-                    subtable = "<td><table>";
-                    if (i == 0)
-                        subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
-                    for (var j = 0, jlen = res[i].choices; j < jlen; ++j) {
-                        ans = res[i].answers[j];
-                        if (parseInt(ans.votecount) >= votes_to_win) {
-                            subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
-                                "<td>" + ans.answer + "</td>" +
-                                "<td>" + ans.votecount +
-                                "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
-                                "</tr>";
-                        } else {
-                            subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
-                                "<td>" + ans.answer + "</td>" +
-                                "<td>" + ans.votecount + "</td>" +
-                                "</tr>";
+            window.res = res;
+            var votetable, restable, subtable, ans;
+            if (res) {
+                restable = "";
+                votetable = "";
+
+                // Resolved issues table
+                if (res.resolved.length) {
+                    restable += "<h3 class='table-banner resolved'>Completed Votes</h3>";
+                    restable += "<table class='vote-table resolved'>";
+                    for (var i = 0, len = res.resolved.length; i < len; ++i) {
+                        restable += "<tr>" +
+                            "<td>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</td>";
+                        subtable = "<td><table>";
+                        if (i == 0)
+                            subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
+                        for (var j = 0, jlen = res.resolved[i].choices; j < jlen; ++j) {
+                            ans = res.resolved[i].answers[j];
+                            if (parseInt(ans.votecount) >= votes_to_win) {
+                                subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
+                                    "<td>" + ans.answer + "</td>" +
+                                    "<td>" + ans.votecount +
+                                    "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
+                                    "</tr>";
+                            } else {
+                                subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
+                                    "<td>" + ans.answer + "</td>" +
+                                    "<td>" + ans.votecount + "</td>" +
+                                    "</tr>";
+                            }
                         }
+                        subtable += "</table></td>";
+                        restable += subtable + "</tr>";
                     }
-                    subtable += "</table></td>";
-                    votetable += subtable + "</tr>";
+                    restable += "</table>";
                 }
-                votetable += "</table>";
-                $('#review-display').html(votetable);
+
+                // In-progress votes table
+                if (res.unresolved.length) {
+                    votetable += "<h3 class='table-banner unresolved'>In-Progress Votes</h3>";
+                    votetable += "<table class='vote-table unresolved'>";
+                    for (var i = 0, len = res.unresolved.length; i < len; ++i) {
+                        votetable += "<tr>" +
+                            "<td>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</td>";
+                        subtable = "<td><table>";
+                        if (i == 0)
+                            subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
+                        for (var j = 0, jlen = res.unresolved[i].choices; j < jlen; ++j) {
+                            ans = res.unresolved[i].answers[j];
+                            if (parseInt(ans.votecount) >= votes_to_win) {
+                                subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
+                                    "<td>" + ans.answer + "</td>" +
+                                    "<td>" + ans.votecount +
+                                    "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
+                                    "</tr>";
+                            } else {
+                                subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
+                                    "<td>" + ans.answer + "</td>" +
+                                    "<td>" + ans.votecount + "</td>" +
+                                    "</tr>";
+                            }
+                        }
+                        subtable += "</table></td>";
+                        votetable += subtable + "</tr>";
+                    }
+                    votetable += "</table>";
+                }
+
+                $('#review-display').html(restable + votetable);
+                
                 $('.tally').each(function () {
                     var tally = this;
                     $(this).click(function (event) {
@@ -134,6 +175,17 @@ var ARBITER = (function (my, $) {
 
     Arbiter.prototype.exhaust = function () {
         var self = this;
+
+        $('#completed-votes').click(function (event) {
+            event.preventDefault();
+            $('.unresolved').each(function () { $(this).hide(); });
+            $('.resolved').each(function () { $(this).show(); });
+        })
+        $('#in-progress-votes').click(function (event) {
+            event.preventDefault();
+            $('.resolved').each(function () { $(this).hide(); });
+            $('.unresolved').each(function () { $(this).show(); });
+        })
 
         $('#modal-ok-button').click(function (event) {
             event.preventDefault();

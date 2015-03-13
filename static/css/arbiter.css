@@ -35,6 +35,14 @@ html, body {
     margin-left: 0;
 }
 
+.table-banner {
+    text-align: center;
+    margin-top: -5px;
+}
+.resolved {
+    display: none;
+}
+
 #modal-ok-box {
     display: none;
 }

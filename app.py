@@ -334,26 +334,46 @@ def load_user(user_id):
 ##########
 
 @socketio.on('get-votes', namespace='/socket.io/')
-def get_votes():
+def get_votes(req):
     if 'user_id' in session:
-        votes = []
+        unresolved = []
+        resolved = []
         with cursor(1) as cur:
-            query = """SELECT question_id, question, choices 
-                       FROM questions 
-                       ORDER BY question_id"""
-            cur.execute(query)
+            query = """SELECT DISTINCT q.question_id, q.question, q.choices
+                       FROM questions q 
+                       INNER JOIN answers a
+                       ON q.question_id = a.question_id
+                       WHERE a.votecount >= %s 
+                       ORDER BY question_id 
+                       DESC"""
+            cur.execute(query, (req['votes_to_win'],))
             for row in cur:
-                votes.append(row)
-            for i, vote in enumerate(votes):
-                votes[i]["answers"] = []
-                query = """SELECT answer_id, answer, votecount 
-                           FROM answers 
-                           WHERE question_id = %s
-                           ORDER BY answer_id"""
+                resolved.append(row)
+            query = """SELECT DISTINCT q.question_id, q.question, q.choices 
+                       FROM questions q
+                       INNER JOIN answers a
+                       ON q.question_id = a.question_id
+                       WHERE a.votecount < %s 
+                       ORDER BY question_id 
+                       DESC"""
+            cur.execute(query, (req['votes_to_win'],))
+            for row in cur:
+                unresolved.append(row)
+            query = """SELECT answer_id, answer, votecount 
+                       FROM answers 
+                       WHERE question_id = %s
+                       ORDER BY answer_id"""
+            for i, vote in enumerate(resolved):
+                resolved[i]["answers"] = []
                 cur.execute(query, (vote['question_id'],))
                 for row in cur:
-                    votes[i]["answers"].append(row)
-        emit('votes', votes)
+                    resolved[i]["answers"].append(row)
+            for i, vote in enumerate(unresolved):
+                unresolved[i]["answers"] = []
+                cur.execute(query, (vote['question_id'],))
+                for row in cur:
+                    unresolved[i]["answers"].append(row)
+        emit('votes', { 'resolved': resolved, 'unresolved': unresolved })
 
 @socketio.on('submit-vote', namespace='/socket.io/')
 def submit_vote(req):
