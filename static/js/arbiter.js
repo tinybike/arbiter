@@ -57,10 +57,11 @@ var ARBITER = (function (my, $) {
 
     // Get all active votes
     Arbiter.prototype.sync = function () {
-        (function sync_votes() {
-            this.socket.emit('get-votes', { votes_to_win: votes_to_win });
-            setTimeout(sync_votes, sync_interval);
-        })();
+        this.socket.emit('get-votes', { votes_to_win: votes_to_win });
+        // (function sync_votes() {
+        //     this.socket.emit('get-votes', { votes_to_win: votes_to_win });
+        //     setTimeout(sync_votes, sync_interval);
+        // })();
     };
     
     Arbiter.prototype.intake = function () {
@@ -68,7 +69,6 @@ var ARBITER = (function (my, $) {
 
         // Display all votes
         this.socket.on('votes', function (res) {
-            window.res = res;
             var votetable, restable, subtable, ans;
             if (res) {
                 restable = "";
@@ -107,7 +107,6 @@ var ARBITER = (function (my, $) {
 
                 // In-progress votes table
                 if (res.unresolved.length) {
-                    console.log(res.unresolved);
                     votetable += "<h3 class='table-banner unresolved'>In-Progress Votes</h3>";
                     votetable += "<table class='vote-table unresolved'>";
                     for (var i = 0, len = res.unresolved.length; i < len; ++i) {
