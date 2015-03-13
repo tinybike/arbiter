@@ -4,7 +4,7 @@
 var ARBITER = (function (my, $) {
 
     var votes_to_win = 4;
-    var sync_interval = 15000;  // 15 second update interval
+    var sync_interval = 60000;  // 60 second update interval
 
     // Module exports
     var _exports = my._exports = my._exports || {};
