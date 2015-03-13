@@ -81,7 +81,7 @@ var ARBITER = (function (my, $) {
                     for (var i = 0, len = res.resolved.length; i < len; ++i) {
                         restable += "<tr>" +
                             "<td>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</td>";
-                        subtable = "<td><table>";
+                        subtable = "<td><table class='resolved'>";
                         if (i == 0)
                             subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
                         for (var j = 0, jlen = res.resolved[i].choices; j < jlen; ++j) {
@@ -107,12 +107,13 @@ var ARBITER = (function (my, $) {
 
                 // In-progress votes table
                 if (res.unresolved.length) {
+                    console.log(res.unresolved);
                     votetable += "<h3 class='table-banner unresolved'>In-Progress Votes</h3>";
                     votetable += "<table class='vote-table unresolved'>";
                     for (var i = 0, len = res.unresolved.length; i < len; ++i) {
                         votetable += "<tr>" +
                             "<td>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</td>";
-                        subtable = "<td><table>";
+                        subtable = "<td><table class='unresolved'>";
                         if (i == 0)
                             subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
                         for (var j = 0, jlen = res.unresolved[i].choices; j < jlen; ++j) {

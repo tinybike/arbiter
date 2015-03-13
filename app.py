@@ -344,20 +344,24 @@ def get_votes(req):
                        INNER JOIN answers a
                        ON q.question_id = a.question_id
                        WHERE a.votecount >= %s 
-                       ORDER BY question_id 
+                       ORDER BY q.question_id 
                        DESC"""
             cur.execute(query, (req['votes_to_win'],))
             for row in cur:
                 resolved.append(row)
-            query = """SELECT DISTINCT q.question_id, q.question, q.choices 
-                       FROM questions q
-                       INNER JOIN answers a
-                       ON q.question_id = a.question_id
-                       WHERE a.votecount < %s 
+            query = """SELECT question_id, question, choices 
+                       FROM questions 
                        ORDER BY question_id 
                        DESC"""
             cur.execute(query, (req['votes_to_win'],))
             for row in cur:
+                is_resolved = False
+                for r in resolved:
+                    if row['question_id'] == r['question_id']:
+                        is_resolved = True
+                        break
+                if is_resolved:
+                    continue
                 unresolved.append(row)
             query = """SELECT answer_id, answer, votecount 
                        FROM answers 
