@@ -79,7 +79,9 @@ var ARBITER = (function (my, $) {
                         restable += "<li>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</li>";
                         restable += "<li><ul class='inline-list padding-top-15'>";
                         restable += "<li><button id='new-" + res.resolved[i].question_id + "' class='button tiny info new-comment'>New Comment</button></li>";
-                        restable += "<li><button id='show-" + res.resolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments</button></li>";
+                        if (res.resolved[i].comments) {
+                            restable += "<li><button id='show-" + res.resolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments (" + res.resolved[i].comments + ")</button></li>";
+                        }
                         restable += "</ul></li></td>";
                         subtable = "<td><table class='resolved'>";
                         if (i == 0)
@@ -119,7 +121,9 @@ var ARBITER = (function (my, $) {
                         votetable += "<li>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</li>";
                         votetable += "<li><ul class='inline-list padding-top-15'>";
                         votetable += "<li><button id='new-" + res.unresolved[i].question_id + "' class='button tiny info new-comment'>New Comment</button></li>";
-                        votetable += "<li><button id='show-" + res.unresolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments</button></li>";
+                        if (res.unresolved[i].comments) {
+                            votetable += "<li><button id='show-" + res.unresolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments (" + res.unresolved[i].comments + ")</button></li>";
+                        }
                         votetable += "</ul></li></td>";
                         subtable = "<td><table class='unresolved'>";
                         if (i == 0)

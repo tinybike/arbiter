@@ -339,7 +339,8 @@ def get_votes(req):
         unresolved = []
         resolved = []
         with cursor(1) as cur:
-            query = """SELECT DISTINCT q.question_id, q.question, q.choices
+            query = """SELECT DISTINCT q.question_id, q.question,
+                                       q.choices, q.comments 
                        FROM questions q 
                        INNER JOIN answers a
                        ON q.question_id = a.question_id
@@ -349,7 +350,7 @@ def get_votes(req):
             cur.execute(query, (req['votes_to_win'],))
             for row in cur:
                 resolved.append(row)
-            query = """SELECT question_id, question, choices 
+            query = """SELECT question_id, question, choices, comments 
                        FROM questions 
                        ORDER BY question_id 
                        DESC"""
