@@ -398,7 +398,6 @@ def get_comments(req):
         cur.execute(query, (req['question_id'],))
         for row in cur:
             comments.append(row)
-    print comments
     emit('comments', {
         'comments': comments,
         'question_id': req['question_id'],
@@ -431,7 +430,10 @@ def submit_comment(req):
             cur.execute(query, params)
             for row in cur:
                 comment_id = row[0]
-        emit('comment-submitted', { 'comment_id': comment_id })
+        emit('comment-submitted', {
+            'comment_id': comment_id,
+            'question_id': req['question_id'],
+        })
 
 @socketio.on('submit-vote', namespace='/socket.io/')
 def submit_vote(req):

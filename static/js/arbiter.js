@@ -105,7 +105,7 @@ var ARBITER = (function (my, $) {
                         }
                         subtable += "</table></td>";
                         restable += subtable + "</tr>";
-                        restable += "<tr><td colspan=2><div id='comments-" + res.resolved[i].question_id + "' class='hidden commentbox'></div></td></tr>";
+                        restable += "<tr><td colspan=2><div id='comments-" + res.resolved[i].question_id + "' class='commentbox'></div></td></tr>";
                     }
                     restable += "</table>";
                 }
@@ -144,7 +144,7 @@ var ARBITER = (function (my, $) {
                         }
                         subtable += "</table></td>";
                         votetable += subtable + "</tr>";
-                        votetable += "<tr><td colspan=2><div id='comments-" + res.unresolved[i].question_id + "' class='hidden commentbox'></div></td></tr>";
+                        votetable += "<tr><td colspan=2><div id='comments-" + res.unresolved[i].question_id + "' class='commentbox'></div></td></tr>";
                     }
                     votetable += "</table>";
                 }
@@ -190,8 +190,9 @@ var ARBITER = (function (my, $) {
                         modal_prompt(prompt, "h2", "New Comment");
                         $('#comment-form').submit(function (event) {
                             event.preventDefault();
+                            var question_id = $(comment).attr('id').split('-')[1];
                             self.socket.emit('submit-comment', {
-                                question_id: $(comment).attr('id').split('-')[1],
+                                question_id: question_id,
                                 comment: $('#comment-text').val()
                             });
                             this.reset();
@@ -239,7 +240,10 @@ var ARBITER = (function (my, $) {
 
         this.socket.on('vote-submitted', function (res) { self.sync(); });
         this.socket.on('question-submitted', function (res) { self.sync(); });
-        this.socket.on('comment-submitted', function (res) { self.sync(); });
+        this.socket.on('comment-submitted', function (res) {
+            self.sync();
+            self.socket.emit('get-comments', { question_id: res.question_id });
+        });
 
         return self;
     };

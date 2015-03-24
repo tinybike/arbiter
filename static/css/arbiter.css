@@ -71,10 +71,8 @@ html, body {
     max-width: 225px;
     width: 50%;
 }
-.hidden {
-    display: none;
-}
 .commentbox {
+    display: none;
     padding: 5px;
     border: 1px solid #ccc;
     background-color: white;
