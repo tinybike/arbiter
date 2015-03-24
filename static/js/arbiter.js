@@ -83,21 +83,21 @@ var ARBITER = (function (my, $) {
                             "<td>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</td>";
                         subtable = "<td><table class='resolved'>";
                         if (i == 0)
-                            subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
+                            subtable += "<tr><th>Answer</th><th>Votes</th><th class='emojis'></th></tr>";
                         for (var j = 0, jlen = res.resolved[i].choices; j < jlen; ++j) {
                             ans = res.resolved[i].answers[j];
+                            subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
+                                "<td>" + ans.answer + "</td>" +
+                                "<td>" + ans.votecount;
                             if (parseInt(ans.votecount) >= votes_to_win) {
-                                subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
-                                    "<td>" + ans.answer + "</td>" +
-                                    "<td>" + ans.votecount +
-                                    "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
-                                    "</tr>";
-                            } else {
-                                subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
-                                    "<td>" + ans.answer + "</td>" +
-                                    "<td>" + ans.votecount + "</td>" +
-                                    "</tr>";
+                                subtable += "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>";
                             }
+                            subtable += "<td class='emojis'><ul class='inline-list'>";
+                            for (var k = 0; k < ans.votecount; ++k) {
+                                subtable += "<li><img src='/static/images/" + ans.emoji[k] + "' alt='" + ans.username[k] + "' title='" + ans.username[k] + "' /></li>";
+                                
+                            }
+                            subtable += "</ul></td></tr>";
                         }
                         subtable += "</table></td>";
                         restable += subtable + "</tr>";
@@ -114,21 +114,21 @@ var ARBITER = (function (my, $) {
                             "<td>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</td>";
                         subtable = "<td><table class='unresolved'>";
                         if (i == 0)
-                            subtable += "<tr><th>Answer</th><th>Votes</th></tr>";
+                            subtable += "<tr><th>Answer</th><th>Votes</th><th class='emojis'></th></tr>";
                         for (var j = 0, jlen = res.unresolved[i].choices; j < jlen; ++j) {
                             ans = res.unresolved[i].answers[j];
+                            subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
+                                "<td>" + ans.answer + "</td>" +
+                                "<td>" + ans.votecount;
                             if (parseInt(ans.votecount) >= votes_to_win) {
-                                subtable += "<tr class='tally checked ans-" + ans.answer_id + "'>" +
-                                    "<td>" + ans.answer + "</td>" +
-                                    "<td>" + ans.votecount +
-                                    "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>" +
-                                    "</tr>";
-                            } else {
-                                subtable += "<tr class='tally ans-" + ans.answer_id + "'>" +
-                                    "<td>" + ans.answer + "</td>" +
-                                    "<td>" + ans.votecount + "</td>" +
-                                    "</tr>";
+                                subtable += "<img src='/static/images/check.png' class='bounded' alt='Winner' /></td>";
                             }
+                            subtable += "<td class='emojis'><ul class='inline-list'>";
+                            for (var k = 0; k < ans.votecount; ++k) {
+                                subtable += "<li><img src='/static/images/" + ans.emoji[k] + "' alt='" + ans.username[k] + "' title='" + ans.username[k] + "' /></li>";
+                                
+                            }
+                            subtable += "</ul></td></tr>";
                         }
                         subtable += "</table></td>";
                         votetable += subtable + "</tr>";

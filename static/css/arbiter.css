@@ -67,3 +67,6 @@ html, body {
     margin: 0;
     width: auto;
 }
+.emojis {
+    width: 225px;
+}

@@ -363,10 +363,17 @@ def get_votes(req):
                 if is_resolved:
                     continue
                 unresolved.append(row)
-            query = """SELECT answer_id, answer, votecount 
-                       FROM answers 
-                       WHERE question_id = %s
-                       ORDER BY answer_id"""
+            query = """SELECT a.answer, a.votecount, v.answer_id,
+                              array_agg(u.emoji) AS emoji,
+                              array_agg(v.username) AS username 
+                       FROM answers a 
+                       LEFT JOIN votes v 
+                       ON a.answer_id = v.answer_id
+                       LEFT JOIN users u 
+                       ON v.user_id = u.user_id            
+                       WHERE a.question_id = %s 
+                       GROUP BY a.answer, a.votecount, v.answer_id 
+                       ORDER BY v.answer_id"""
             for i, vote in enumerate(resolved):
                 resolved[i]["answers"] = []
                 cur.execute(query, (vote['question_id'],))
@@ -377,6 +384,9 @@ def get_votes(req):
                 cur.execute(query, (vote['question_id'],))
                 for row in cur:
                     unresolved[i]["answers"].append(row)
+        # from pprint import pprint
+        # retval = { 'resolved': resolved, 'unresolved': unresolved }
+        # pprint(retval['resolved'])
         emit('votes', { 'resolved': resolved, 'unresolved': unresolved })
 
 @socketio.on('submit-vote', namespace='/socket.io/')

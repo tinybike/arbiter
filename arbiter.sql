@@ -7,6 +7,7 @@ CREATE TABLE users (
     joined timestamp DEFAULT statement_timestamp(),
     active timestamp DEFAULT statement_timestamp(),
     admin boolean DEFAULT false,
+    emoji varchar(50) DEFAULT 'awkward.png',
     UNIQUE (username)
 );
 
