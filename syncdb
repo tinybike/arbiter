@@ -1,0 +1,73 @@
+#!/bin/bash
+# Backup local arbiter postgres database to file, fetch remote database
+# from server, then load remote database into local.
+OPTIND=1
+remotedb=0
+resetuser=0
+
+while getopts "ru" opt; do
+    case "$opt" in
+    r)  remotedb=1
+        ;;
+    u)  resetuser=1
+        ;;
+    esac
+done
+
+shift $((OPTIND-1))
+[ "$1" = "--" ] && shift
+
+echo "Dumping local arbiter database to $ARBITER/db/dump..."
+rm $ARBITER/db/dump/arbiter_local.db &> /dev/null
+pg_dump --encoding SQL_ASCII -Uarbiter -hlocalhost arbiter -f $ARBITER/db/dump/arbiter_local.db &> /dev/null
+
+echo "Compressing..."
+rm $ARBITER/db/dump/arbiter_local.db.gz &> /dev/null
+gzip $ARBITER/db/dump/arbiter_local.db &> /dev/null
+echo "Database dump ok."
+
+sudo service postgresql restart
+
+echo "Resetting arbiter database..."
+if [ $resetuser -eq 1 ]; then
+    echo "- Drop user arbiter"
+    sudo -u postgres dropuser arbiter &> /dev/null
+    sleep 1
+    echo "- Create user arbiter"
+    sudo -u postgres createuser -P -D -R -S arbiter &> /dev/null
+    sleep 1
+fi
+echo "- Drop database arbiter"
+sudo -u postgres dropdb arbiter &> /dev/null
+sleep 1
+echo "- Create database arbiter"
+sudo -u postgres createdb -E SQL_ASCII -T template0 arbiter &> /dev/null
+echo "Database reset ok."
+
+if [ $remotedb -eq 1 ]; then
+    echo "Dumping remote database to file..."
+    ssh deploy@crypto.cab &> /dev/null <<'ENDSSH'
+rm /home/deploy/deploy/arbiter/db/dump/arbiter.db*
+pg_dump --encoding SQL_ASCII -Uarbiter -hlocalhost arbiter -f /home/deploy/deploy/arbiter/db/dump/arbiter.db
+gzip /home/deploy/deploy/arbiter/db/dump/arbiter.db
+ENDSSH
+    echo "Copying remote database file into $ARBITER/db/dump..."
+    rm $ARBITER/db/dump/arbiter.db* &> /dev/null
+    scp deploy@crypto.cab:/home/deploy/deploy/arbiter/db/dump/arbiter.db.gz $ARBITER/db/dump/ &> /dev/null
+fi
+
+echo "Decompressing..."
+rm $ARBITER/db/dump/arbiter.db &> /dev/null
+gunzip $ARBITER/db/dump/arbiter.db.gz &> /dev/null
+
+echo "Loading $ARBITER/db/dump/arbiter.db into database..."
+psql -Uarbiter -hlocalhost -darbiter -f $ARBITER/db/dump/arbiter.db &> /dev/null
+
+echo "Compressing..."
+rm $ARBITER/db/dump/arbiter.db.gz &> /dev/null
+gzip $ARBITER/db/dump/arbiter.db &> /dev/null
+
+echo "Updating triggers..."
+psql -Uarbiter -hlocalhost -darbiter -q -f $ARBITER/app/sql/triggers.sql &> /dev/null
+
+echo "Database loaded."
