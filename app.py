@@ -363,7 +363,7 @@ def get_votes(req):
                 if is_resolved:
                     continue
                 unresolved.append(row)
-            query = """SELECT a.answer, a.votecount, v.answer_id,
+            query = """SELECT a.answer, a.votecount, a.answer_id,
                               array_agg(u.emoji) AS emoji,
                               array_agg(v.username) AS username 
                        FROM answers a 
@@ -372,8 +372,8 @@ def get_votes(req):
                        LEFT JOIN users u 
                        ON v.user_id = u.user_id            
                        WHERE a.question_id = %s 
-                       GROUP BY a.answer, a.votecount, v.answer_id 
-                       ORDER BY v.answer_id"""
+                       GROUP BY a.answer, a.votecount, a.answer_id 
+                       ORDER BY a.answer_id"""
             for i, vote in enumerate(resolved):
                 resolved[i]["answers"] = []
                 cur.execute(query, (vote['question_id'],))
