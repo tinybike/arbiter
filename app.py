@@ -384,10 +384,54 @@ def get_votes(req):
                 cur.execute(query, (vote['question_id'],))
                 for row in cur:
                     unresolved[i]["answers"].append(row)
-        # from pprint import pprint
-        # retval = { 'resolved': resolved, 'unresolved': unresolved }
-        # pprint(retval['resolved'])
         emit('votes', { 'resolved': resolved, 'unresolved': unresolved })
+
+@socketio.on('get-comments', namespace='/socket.io/')
+def get_comments(req):
+    comments = []
+    with cursor(1) as cur:
+        query = """SELECT comment_id, username, emoji, comment, commenttime
+                   FROM comments
+                   WHERE question_id = %s
+                   ORDER BY comment_id
+                   DESC"""
+        cur.execute(query, (req['question_id'],))
+        for row in cur:
+            comments.append(row)
+    print comments
+    emit('comments', {
+        'comments': comments,
+        'question_id': req['question_id'],
+    })
+
+@socketio.on('submit-comment', namespace='/socket.io/')
+def submit_comment(req):
+    comment_id = None
+    if 'user_id' in session:
+        with cursor() as cur:
+            query = "SELECT username, emoji FROM users WHERE user_id = %s"
+            cur.execute(query, (session['user_id'],))
+            for row in cur:
+                username = row[0]
+                emoji = row[1]
+            query = """INSERT INTO comments 
+                       (question_id, user_id, username,
+                       emoji, comment) 
+                       VALUES 
+                       (%(question_id)s, %(user_id)s, %(username)s,
+                       %(emoji)s, %(comment)s) 
+                       RETURNING comment_id"""
+            params = {
+                'question_id': req['question_id'],
+                'user_id': session['user_id'],
+                'username': username,
+                'emoji': emoji,
+                'comment': req['comment'],
+            }
+            cur.execute(query, params)
+            for row in cur:
+                comment_id = row[0]
+        emit('comment-submitted', { 'comment_id': comment_id })
 
 @socketio.on('submit-vote', namespace='/socket.io/')
 def submit_vote(req):

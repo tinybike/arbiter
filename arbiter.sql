@@ -42,6 +42,17 @@ CREATE TABLE votes (
     UNIQUE (user_id, question_id)
 );
 
+DROP TABLE IF EXISTS comments CASCADE;
+CREATE TABLE comments (
+    comment_id bigserial PRIMARY KEY,
+    question_id bigint,
+    user_id bigint,
+    username varchar(20),
+    emoji varchar(50),
+    comment text,
+    commenttime timestamp DEFAULT statement_timestamp()
+);
+
 CREATE OR REPLACE FUNCTION increment_votecount()
 RETURNS TRIGGER AS $function$
 BEGIN

@@ -58,10 +58,6 @@ var ARBITER = (function (my, $) {
     // Get all active votes
     Arbiter.prototype.sync = function () {
         this.socket.emit('get-votes', { votes_to_win: votes_to_win });
-        // (function sync_votes() {
-        //     this.socket.emit('get-votes', { votes_to_win: votes_to_win });
-        //     setTimeout(sync_votes, sync_interval);
-        // })();
     };
     
     Arbiter.prototype.intake = function () {
@@ -79,8 +75,12 @@ var ARBITER = (function (my, $) {
                     restable += "<h3 class='table-banner resolved'>Completed Votes</h3>";
                     restable += "<table class='vote-table resolved'>";
                     for (var i = 0, len = res.resolved.length; i < len; ++i) {
-                        restable += "<tr>" +
-                            "<td>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</td>";
+                        restable += "<tr><td><ul class='plain flush-left'>";
+                        restable += "<li>" + res.resolved[i].question_id + ". " + res.resolved[i].question + "</li>";
+                        restable += "<li><ul class='inline-list padding-top-15'>";
+                        restable += "<li><button id='new-" + res.resolved[i].question_id + "' class='button tiny info new-comment'>New Comment</button></li>";
+                        restable += "<li><button id='show-" + res.resolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments</button></li>";
+                        restable += "</ul></li></td>";
                         subtable = "<td><table class='resolved'>";
                         if (i == 0)
                             subtable += "<tr><th>Answer</th><th>Votes</th><th class='emojis'></th></tr>";
@@ -94,13 +94,18 @@ var ARBITER = (function (my, $) {
                             }
                             subtable += "<td class='emojis'><ul class='inline-list'>";
                             for (var k = 0; k < ans.votecount; ++k) {
-                                subtable += "<li><img src='/static/images/" + ans.emoji[k] + "' alt='" + ans.username[k] + "' title='" + ans.username[k] + "' /></li>";
+                                subtable += "<li>" +
+                                    "<img src='/static/images/" + ans.emoji[k] +
+                                    "' alt='" + ans.username[k] + "' title='" +
+                                    ans.username[k] + "' />" +
+                                    "</li>";
                                 
                             }
                             subtable += "</ul></td></tr>";
                         }
                         subtable += "</table></td>";
                         restable += subtable + "</tr>";
+                        restable += "<tr><td colspan=2><div id='comments-" + res.resolved[i].question_id + "' class='hidden commentbox'></div></td></tr>";
                     }
                     restable += "</table>";
                 }
@@ -110,8 +115,12 @@ var ARBITER = (function (my, $) {
                     votetable += "<h3 class='table-banner unresolved'>In-Progress Votes</h3>";
                     votetable += "<table class='vote-table unresolved'>";
                     for (var i = 0, len = res.unresolved.length; i < len; ++i) {
-                        votetable += "<tr>" +
-                            "<td>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</td>";
+                        votetable += "<tr><td><ul class='plain flush-left'>";
+                        votetable += "<li>" + res.unresolved[i].question_id + ". " + res.unresolved[i].question + "</li>";
+                        votetable += "<li><ul class='inline-list padding-top-15'>";
+                        votetable += "<li><button id='new-" + res.unresolved[i].question_id + "' class='button tiny info new-comment'>New Comment</button></li>";
+                        votetable += "<li><button id='show-" + res.unresolved[i].question_id + "' class='button tiny secondary show-comments'>Show Comments</button></li>";
+                        votetable += "</ul></li></td>";
                         subtable = "<td><table class='unresolved'>";
                         if (i == 0)
                             subtable += "<tr><th>Answer</th><th>Votes</th><th class='emojis'></th></tr>";
@@ -125,13 +134,17 @@ var ARBITER = (function (my, $) {
                             }
                             subtable += "<td class='emojis'><ul class='inline-list'>";
                             for (var k = 0; k < ans.votecount; ++k) {
-                                subtable += "<li><img src='/static/images/" + ans.emoji[k] + "' alt='" + ans.username[k] + "' title='" + ans.username[k] + "' /></li>";
-                                
+                                subtable += "<li>" +
+                                    "<img src='/static/images/" + ans.emoji[k] +
+                                    "' alt='" + ans.username[k] + "' title='" +
+                                    ans.username[k] + "' />" +
+                                    "</li>";
                             }
                             subtable += "</ul></td></tr>";
                         }
                         subtable += "</table></td>";
                         votetable += subtable + "</tr>";
+                        votetable += "<tr><td colspan=2><div id='comments-" + res.unresolved[i].question_id + "' class='hidden commentbox'></div></td></tr>";
                     }
                     votetable += "</table>";
                 }
@@ -163,12 +176,70 @@ var ARBITER = (function (my, $) {
                         $(this).addClass('cast-vote');
                     });
                 });
+
+                $('.new-comment').each(function () {
+                    var comment = this;
+                    $(this).click(function (event) {
+                        event.preventDefault();
+                        var prompt = '<hr /><div class="row centered">' +
+                                     '<form action="#" method="POST" id="comment-form">' +
+                                     '<textarea id="comment-text" placeholder="Enter your comment here" required autofocus />' +
+                                     '<button type="submit" class="button expand" ' +
+                                     'id="submit-comment-button">Comment</button>' +
+                                     '</form></div>';
+                        modal_prompt(prompt, "h2", "New Comment");
+                        $('#comment-form').submit(function (event) {
+                            event.preventDefault();
+                            self.socket.emit('submit-comment', {
+                                question_id: $(comment).attr('id').split('-')[1],
+                                comment: $('#comment-text').val()
+                            });
+                            this.reset();
+                            $('#modal-dynamic').foundation('reveal', 'close');
+                        });
+                    });
+                });
+                $('.show-comments').each(function () {
+                    var comment = this;
+                    $(this).click(function (event) {
+                        event.preventDefault();
+                        self.socket.emit('get-comments', {
+                            question_id: $(comment).attr('id').split('-')[1]
+                        });
+                    });
+                });
+
                 _exports.votes = res;
+            }
+        });
+
+        this.socket.on('comments', function (res) {
+            if (res && res.question_id && res.comments.length) {
+                var div = $("#comments-" + res.question_id);
+                div.empty();
+                for (var i = 0, len = res.comments.length; i < len; ++i) {
+                    var comment = res.comments[i];
+                    div.append(
+                        $('<img />').attr('src', '/static/images/' + comment.emoji)
+                                    .attr('alt', comment.username)
+                                    .attr('title', comment.username)
+                                    .css('float', 'left')
+                    );
+                    div.append(
+                        $('<div />')
+                            .text(comment.username + ' @ ' + comment.commenttime)
+                            .css('float', 'right')
+                    );
+                    div.append($('<p class="commenttext" />').text(comment.comment));
+                    div.append($('<hr />'));
+                }
+                div.slideToggle();
             }
         });
 
         this.socket.on('vote-submitted', function (res) { self.sync(); });
         this.socket.on('question-submitted', function (res) { self.sync(); });
+        this.socket.on('comment-submitted', function (res) { self.sync(); });
 
         return self;
     };
