@@ -4,10 +4,12 @@
   <title>arbiter</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/arbiter.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/google-fonts.css') }}" />
+  <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/google-fonts.css') }}" /> -->
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato|Sunshiney|Poiret+One|Open+Sans|Sigmar+One|Cinzel+Decorative" />
   <script src="{{ url_for('static', filename='js/vendor/modernizr.js') }}"></script>
   <script>
     window.username = "{{ session.user }}";
+    window.emoji = "{{ session.emoji }}";
     window.login = (username != "");
   </script>
   {% block page %}{% endblock %}

@@ -53,10 +53,11 @@ login_manager.session_protection = 'strong'
 
 class User(object):
 
-    def __init__(self, id=None, username=None, email=None):
+    def __init__(self, id=None, username=None, email=None, emoji=None):
         self.id = id
         self.username = username
         self.email = email
+        self.emoji = emoji
 
     def is_authenticated(self):
         return True
@@ -241,10 +242,11 @@ def insert_user(username, password, email):
             insert_result = cur.fetchone()[0]
     return insert_result
 
-def create_session(userid, username, password, email):
-    user = User(userid, username, email)
+def create_session(userid, username, password, email, emoji):
+    user = User(userid, username, email, emoji)
     login_user(user)
     session['user'] = escape(user.username)
+    session['emoji'] = escape(user.emoji)
     return user, session
 
 @app.route('/register', methods=['GET','POST'])
@@ -262,7 +264,8 @@ def register():
             user, session = create_session(insert_result,
                                            request.form['username'],
                                            request.form['password'],
-                                           request.form['email'])
+                                           request.form['email'],
+                                           'awkward.png')
             return render_template('index.html', registration_ok=True)
         # Failure
         else:
@@ -285,7 +288,7 @@ def login():
             return render_template('login.html')
     user = None
     with cursor(1) as cur:
-        query = """SELECT user_id, password, email, admin FROM users 
+        query = """SELECT user_id, password, email, emoji, admin FROM users 
                    WHERE username = %s"""
         cur.execute(query, (request.form['username'],))
         for row in cur:
@@ -294,7 +297,8 @@ def login():
                                     stored_password_digest):
                 user = User(row['user_id'],
                             request.form['username'],
-                            row['email'])
+                            row['email'],
+                            row['emoji'])
                 admin = row['admin']
     if user is None or user.id is None:
         flash('Username or password is invalid', 'error')
@@ -305,6 +309,7 @@ def login():
     login_user(user)
     session['user'] = escape(user.username)
     session['admin'] = admin
+    session['emoji'] = escape(user.emoji)
     return redirect(url_for('index'))
 
 @app.route('/logout')

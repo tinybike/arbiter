@@ -1,17 +1,52 @@
 html, body {
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+body {
+    background: url('/static/images/crossword.png');
+}
 .title {
-    font-family: "Poiret One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: bold;
+    font-family: "Cinzel Decorative", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 19pt;
+    color: #000;
+    text-shadow: #76A2B8 0px 1px 1px;
+}
+#navbar {
+    /*background-color: #76A2B8;*/
+    /*background-color: #8CBCD3;*/
+    background-color: #FDFDFD;
+    border-bottom: 1px solid #000;
+}
+#navbar-section ul li a {
+    background-color: #FDFDFD;
+    border-bottom: 1px solid #000;
+    color: #000;
+    height: 45px;
+    font-size: 12pt; 
+}
+#navbar-section ul li a:hover {
+    /*background-color: #95CAE5;*/
+    background-color: #D5EAF4;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
 }
 #splash {
-    font-family: "Poiret One", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Cinzel Decorative", "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 55pt;
     text-align: center;
+    margin: 0 10px;
+}
+.splashbox {
+    margin: 15px 0 25px 0 !important;
+    line-height: 46pt;
+    padding: 25px 0;
+    /*background-color: #9DD0E9;*/
 }
 #main-panel {
-    background-color: #FFF;
+    background-color: #FDFDFD;
+    border: 1px solid #ccc;
 }
 .vertical-spacer-25 {
     clear: both;
@@ -38,6 +73,7 @@ html, body {
 .table-banner {
     text-align: center;
     margin-top: -5px;
+    font-family: "Cinzel Decorative";
 }
 .resolved {
     display: none;
@@ -83,4 +119,7 @@ html, body {
     padding-right: 10px;
     padding-top: 0;
     padding-bottom: 0;
+}
+.clear {
+    clear: both;
 }

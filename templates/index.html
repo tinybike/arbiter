@@ -3,6 +3,19 @@
 {% block body %}
 <div class="row">
   <div id="review-display"></div>
-  <div id="splash">arbiter</div>
+  <div id="splash">
+    <div class="row splashbox">
+      Forecast Foundation
+    </div>
+    <hr />
+    <div class="row clear">
+      <div class="large-6 columns">
+        <a href="{{ url_for('login') }}"><button class="button expand info">login</button></a>
+      </div>
+      <div class="large-6 columns end">
+        <button class="button expand info disabled">register</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

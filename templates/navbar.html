@@ -1,15 +1,16 @@
-<nav class="top-bar" data-topbar>
+<nav class="top-bar" id="navbar" data-topbar>
   <ul class="title-area">
     <li class="name">
-      <h1><a href="/"><span class="title">arbiter</span></a></h1>
+      <h1><a href="/"><span class="title">FF</span></a></h1>
     </li>
     <li class="toggle-topbar menu-icon">
       <a href="#"><span>Menu</span></a>
     </li>
   </ul>
-  <section class="top-bar-section">
+  <section class="top-bar-section" id="navbar-section">
     <ul class="left">
       <li class="divider"></li>
+      {% if g.user.is_authenticated() %}
       <li>
         <a href="#" id="in-progress-votes">in-progress</a>
       </li>
@@ -18,6 +19,7 @@
         <a href="#" id="completed-votes">completed</a>
       </li>
       <li class="divider"></li>
+      {% endif %}
     </ul>
     <ul class="right">
       <li class="divider"></li>
@@ -25,7 +27,6 @@
     <ul class="right">
       <li class="divider"></li>
       {% if g.user.is_authenticated() %}
-        <li class="divider"></li>
         <li>
           <a href="#" id="new-question">new question</a>
         </li>
@@ -35,11 +36,13 @@
         </li>
         <li class="divider"></li>
         <li>
-          <a href="#" id="userblock">{{ session.user }}</a>
+          <a href="#" id="userblock">
+            <img src="/static/images/{{ session.emoji }}" />
+          </a>
         </li>
       {% else %}
         <!-- <li><a href="{{ url_for('register') }}">register</a></li> -->
-        <li class="divider"></li>
+        <!-- <li class="divider"></li> -->
         <li><a href="{{ url_for('login') }}">login</a></li>
       {% endif %}
     </ul>
